@@ -12,7 +12,7 @@ struct poly_t
 };
 
 void init_poly( poly_t &p, double const init_coeffs[], unsigned int const init_degree );
-void destroy_poly( poly_t &p );
+void destroy_poly( poly_t &p );	
 unsigned int poly_degree( poly_t const &p );
 double poly_coeff( poly_t const &p, unsigned int n );
 double poly_val( poly_t const &p, double const x );
@@ -40,8 +40,8 @@ void init_poly(poly_t &p, double const init_coeffs[], unsigned int const init_de
 }
 void destroy_poly(poly_t &p)
 {
-	    delete[] p.a_coeffs;
-	    p.a_coeffs = nullptr;
+	delete[] p.a_coeffs;
+	p.a_coeffs = nullptr;
 }
 unsigned int poly_degree(poly_t const &p)
 {
@@ -153,42 +153,39 @@ void poly_add( poly_t &p, poly_t const &q )
 	{
 		throw 0;	    //not sure throw?
     }
-
 	double *pnew= new double[std::max(p.degree,q.degree)+1];
-		for(unsigned int i = 0; i <= std::max(p.degree,q.degree); i++)
-        {
-            if(i<=std::min(p.degree,q.degree))
+	for(unsigned int i = 0; i <= std::max(p.degree,q.degree); i++)
+    {
+        if(i<=std::min(p.degree,q.degree))
+		{
+			pnew[i] = p.a_coeffs[i] + q.a_coeffs[i];
+		}
+		else 
+		{
+			if(p.degree >=q.degree)
 			{
-				pnew[i] = p.a_coeffs[i] + q.a_coeffs[i];
+				pnew[i] = p.a_coeffs[i];
 			}
-			else 
-			{
-				if(p.degree >=q.degree)
-				{
-					pnew[i] = p.a_coeffs[i];
-				}
-                else
-				{
-                    pnew[i] = q.a_coeffs[i];
-				}
-			}
-        }
-        p.degree = std::max(p.degree,q.degree);
-		delete[] p.a_coeffs;
-        p.a_coeffs = pnew;
-        for(unsigned int i = p.degree; i >= 0; i--)
-        {
-            if(p.a_coeffs[i] == 0)
-            {
-            	p.degree--;
-            }
             else
-            {
-            	break;
-            }
+			{                  
+				  pnew[i] = q.a_coeffs[i];
+			}
+		}
+    }
+    p.degree = std::max(p.degree,q.degree);
+	delete[] p.a_coeffs;
+    p.a_coeffs = pnew;
+    for(unsigned int i = p.degree; i >= 0; i--)
+    {
+        if(p.a_coeffs[i] == 0)
+        {
+        	p.degree--;
         }
-		
-
+        else
+        {
+        	break;
+        }
+    }		
 }
 void poly_subtract( poly_t &p, poly_t const &q )
 {
@@ -196,42 +193,39 @@ void poly_subtract( poly_t &p, poly_t const &q )
 	{
 		throw 0;	    //not sure throw?
     }
-
 	double *pnew= new double[std::max(p.degree,q.degree)+1];
-		for(unsigned int i = 0; i <= std::max(p.degree,q.degree); i++)
-        {
-			if(i<=std::min(p.degree,q.degree))
+	for(unsigned int i = 0; i <= std::max(p.degree,q.degree); i++)
+    {
+		if(i<=std::min(p.degree,q.degree))
+		{
+			pnew[i] = p.a_coeffs[i] - q.a_coeffs[i];
+		}
+		else 
+		{
+			if(p.degree >=q.degree)
 			{
-				pnew[i] = p.a_coeffs[i] - q.a_coeffs[i];
+				pnew[i] = p.a_coeffs[i];
 			}
-			else 
-			{
-				if(p.degree >=q.degree)
-				{
-					pnew[i] = p.a_coeffs[i];
-				}
-                else
-				{
-                    pnew[i] = -q.a_coeffs[i];
-				}
-			}
-        }
-        p.degree = std::max(p.degree,q.degree);
-		delete[] p.a_coeffs;
-        p.a_coeffs = pnew;
-        for(unsigned int i = p.degree; i >= 0; i--)
-        {
-            if(p.a_coeffs[i] == 0)
-            {
-            	p.degree--;
-            }
             else
-            {
-            	break;
-            }
+			{
+                pnew[i] = -q.a_coeffs[i];
+			}
+		}
+    }
+    p.degree = std::max(p.degree,q.degree);
+	delete[] p.a_coeffs;
+    p.a_coeffs = pnew;
+    for(unsigned int i = p.degree; i >= 0; i--)
+    {
+        if(p.a_coeffs[i] == 0)
+        {
+            p.degree--;
         }
-		
-
+        else
+        {
+        	break;
+        }
+    }
 }
 void poly_multiply( poly_t &p, poly_t const &q )
 {
@@ -239,8 +233,7 @@ void poly_multiply( poly_t &p, poly_t const &q )
     {
     	throw 0;
     }
-
-    double *pnew= new double[p.degree+q.degree+2];
+    double *pnew= new double[p.degree+q.degree+1];
         for (unsigned int i = 0; i <= p.degree+q.degree; i++)
         {
 	       pnew[i] = 0;
@@ -263,15 +256,20 @@ void poly_multiply( poly_t &p, poly_t const &q )
 
 double poly_divide( poly_t &p, double r )
 {
-    if(p.a_coeffs == nullptr)
+	if(p.a_coeffs == nullptr)
     {
     	throw 0;
     }
 	if(p.degree == 0)
 	{
-        return p.a_coeffs[0];
+        double *pnew = new double[1];//new double[2]
+		pnew[0] =0;
+		p.degree = 0;
+		delete[] p.a_coeffs;
+        p.a_coeffs = pnew;
+		return p.a_coeffs[0];
 	}
-	double *pnew = new double[p.degree];
+	double *pnew = new double[p.degree]; //+1
 	double result = p.a_coeffs[p.degree];
 	for(unsigned int i = p.degree; i >= 1; i--)
 	{
@@ -282,6 +280,7 @@ double poly_divide( poly_t &p, double r )
     p.a_coeffs = pnew;
     p.degree = p.degree-1;
 	return result;
+	//return poly_value(p,r);  this is genius!
 }
 
 void poly_diff( poly_t &p )
@@ -290,7 +289,7 @@ void poly_diff( poly_t &p )
     {
     	throw 0;
     }
-	double *pnew= new double[p.degree+1];
+	double *pnew= new double[p.degree];
     for (unsigned int i = 0; i < p.degree; i++)
     {
 	    pnew[i] = p.a_coeffs[i+1]*(i+1);
